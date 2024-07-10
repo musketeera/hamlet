@@ -152,7 +152,7 @@ if __name__ == "__main__":
                     json.dump(cfg, of, indent=4)
                 config_files.append(cfg_out_file)
             cfgs.append(cfgs_aux)
-
+    # 从这里是主程序的入口
     if args.machine == "local":
         i = 0
         for cfgs_aux in cfgs:
