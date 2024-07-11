@@ -9,21 +9,10 @@ import shutil
 
 import torch
 from experiments import generate_experiment_cfgs
+from mmcv import Config, get_git_hash
 
 from mmseg.apis import set_random_seed
 from tools import train
-
-# 替代 mmcv.Config
-def load_config(file_path):
-    with open(file_path, 'r') as f:
-        return json.load(f)
-
-# 替代 mmcv.get_git_hash
-def get_git_hash():
-    try:
-        return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
-    except subprocess.CalledProcessError:
-        return 'unknown'
 
 def run_command(command):
     p = subprocess.Popen(
@@ -73,7 +62,7 @@ if __name__ == "__main__":
 
     # Training with Predefined Config
     if args.config is not None:
-        cfg = load_config(args.config)
+        cfg = Config.fromfile(args.config)
         # Specify Name and Work Directory
         exp_name = f'{args.machine}-{cfg["exp"]}'
         unique_name = (
