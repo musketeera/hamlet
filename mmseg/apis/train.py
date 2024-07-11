@@ -147,6 +147,7 @@ def train_segmentor(
             None, checkpoint_config=cfg.checkpoint_config, log_config=cfg.log_config
         )
 
+    # 从这里开始是在线训练
     elif "online" in cfg:
         # cityscapes numbers
         limit, threshold_src, threshold_max = (

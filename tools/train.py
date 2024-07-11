@@ -146,11 +146,14 @@ def main(args):
     meta['seed'] = args.seed
     meta['exp_name'] = osp.splitext(osp.basename(args.config))[0]
 
+    # 在这里构造训练模型
     model = build_train_model(
         cfg, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
+    
     if ('uda' not in cfg or not 'segmentator_pretrained' in cfg['uda']) and cfg['segmentator_pretrained'] is None:
         model.init_weights()
     elif cfg['segmentator_pretrained'] is not None and 'uda' not in cfg:
+        # 导入预训练的模型权重
         checkpoint = load_checkpoint(model, cfg['segmentator_pretrained'], map_location='cpu')
         model.CLASSES = checkpoint['meta']['CLASSES']
         model.PALETTE = checkpoint['meta']['PALETTE']
@@ -162,6 +165,7 @@ def main(args):
 
     if 'online_old' in cfg:
         # ugly walkaround because json does not store tuples
+        # 处理训练数据管道
         for train in cfg.online.train:
             for s_pipe in train.source.pipeline:
                 for key, val in s_pipe.items():
@@ -172,6 +176,7 @@ def main(args):
                     if isinstance(val, list) and len(val) == 2:
                         s_pipe[key] = tuple(val)
 
+        # 处理验证数据管道
         for val in cfg.online.val:
             for s_pipe in val.pipeline:
                 for key, val in s_pipe.items():
@@ -180,6 +185,7 @@ def main(args):
 
         cfg.workflow = [tuple(a) for a in cfg.workflow]
 
+        # 使用 build_dataset 函数构建数据集，并获取数据集的类别和调色板信息
         datasets = [build_dataset(train) for train in cfg.online.train]
         classes = datasets[0].CLASSES
         palette = datasets[0].PALETTE
@@ -225,6 +231,7 @@ def main(args):
                     continue
                 train.pipeline = test_pipeline
 
+        # 处理在线训练的数据集配置
         datasets = [build_dataset(train) for train in cfg.online.train]
 
         classes = datasets[0].CLASSES
