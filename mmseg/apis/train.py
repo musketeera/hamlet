@@ -81,29 +81,8 @@ def train_segmentor(
         ]
 
     # put model on gpus
-    if distributed:
-        find_unused_parameters = cfg.get("find_unused_parameters", False)
-        use_ddp_wrapper = cfg.get("use_ddp_wrapper", False)
-        # Sets the `find_unused_parameters` parameter in
-        # torch.nn.parallel.DistributedDataParallel
-        if use_ddp_wrapper:
-            mmcv.print_log("Use DDP Wrapper.", "mmseg")
-            model = DistributedDataParallelWrapper(
-                model.cuda(),
-                device_ids=[torch.cuda.current_device()],
-                broadcast_buffers=False,
-                find_unused_parameters=find_unused_parameters,
-            )
-        else:
-            model = MMDistributedDataParallel(
-                model.cuda(),
-                device_ids=[torch.cuda.current_device()],
-                broadcast_buffers=False,
-                find_unused_parameters=find_unused_parameters,
-            )
-    else:
-        model = MMDataParallel(model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
-
+    model = model.cuda(cfg.gpu_ids[0])
+    # 构建优化器
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
 
